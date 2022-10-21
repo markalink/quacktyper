@@ -1,0 +1,13 @@
+{
+  "files": {
+    "main.css": "/quacktyper/static/css/main.ccadaf55.css",
+    "main.js": "/quacktyper/static/js/main.9bccdb0c.js",
+    "index.html": "/quacktyper/index.html",
+    "main.ccadaf55.css.map": "/quacktyper/static/css/main.ccadaf55.css.map",
+    "main.9bccdb0c.js.map": "/quacktyper/static/js/main.9bccdb0c.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.ccadaf55.css",
+    "static/js/main.9bccdb0c.js"
+  ]
+}
