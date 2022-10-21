@@ -1,9 +1,9 @@
+//show best time, explore animations
 import { useEffect, useRef, useState } from 'react';
 import './App.css';
-//implement timer/wpm
-//text border card?
-let quoteString;
-let inputValue;
+
+let quoteString = "";
+let inputValue = "";
 let mistakeCount;
 let prevIncorrectChars;
 let correctChars;
@@ -14,13 +14,12 @@ let currentTime;
 let testResults = [];
 
 function App() {
-  const QUOTE_API = "https://quotable.io/random?minLength=150"; //find api with longer quotes or filter these
+  const QUOTE_API = "https://quotable.io/random?minLength=150"; //find api with more quotes
 
-  const [renderNewQuote, setRenderNewQuote] = useState(false)
-  const [renderText, setRenderText] = useState(false);
-  // const [testResults, setTestResults] = useState([]) //differentiate between completed and skipped w/enter
+  const [rerender, setRerender] = useState(false);
   const [quote, setQuote] = useState([])
   const [accuracy, setAccuracy] = useState(0)
+  const [best, setBest] = useState(0)
   const [wpm, setWpm] = useState(0)
   const [avgWpm, setAvgWpm] = useState(0)
   const inputRef = useRef(null)
@@ -42,21 +41,11 @@ function App() {
     return fetch(QUOTE_API).then(response => response.json()).then(data => data.content)
   }
 
-  useEffect(() => {
-    stopTimer()
-    newQuote()
-    inputRef.current.value = ""
-    currentTime = 0
-    correctChars = 0
-    mistakeCount = 0
-    prevIncorrectChars = 0
-    timerStarted = false
-    setIsFinished(false)
-  }, [renderNewQuote])
+  useEffect(() => newQuote,[])
 
   const newQuote = async () => {
     let tempQuote = [];
-    quoteString = await fetchQuote(); //deal with this character — replace with -
+    quoteString = await fetchQuote();
     quoteString = quoteString.replace("—", "-")
     // quoteString = "word"
     const wordArray = quoteString.split(" ")
@@ -73,6 +62,15 @@ function App() {
     tempQuote[tempQuote.length - 1].letters.splice(-1, 1)
     setQuote(tempQuote);
     // currentIndex = 0; for single character update implementation
+
+    stopTimer()
+    inputRef.current.value = ""
+    currentTime = 0
+    correctChars = 0
+    mistakeCount = 0
+    prevIncorrectChars = 0
+    timerStarted = false
+    setIsFinished(false)
   }
 
   let startTime;
@@ -86,6 +84,7 @@ function App() {
     }, 500)
     )
   }
+
   const stopTimer = () => {
     clearInterval(intervalId)
   }
@@ -112,9 +111,10 @@ function App() {
       mistakeCount += incorrectChars - prevIncorrectChars;
     }
     prevIncorrectChars = incorrectChars
+    setWpm(correctChars / 5 / currentTime * 60) //problem with state not changing, setting to NaN
     checkIsFinished()
-    setWpm(correctChars / 5 / currentTime * 60)
-    setRenderText(old => !old)
+    console.log(wpm)
+    setRerender(old => !old)
   }
 
   const changeLetterStyle = (index, style) => {
@@ -133,14 +133,17 @@ function App() {
     setQuote(tempQuote);
   }
 
-  const checkIsFinished = () => {
+  let finalWpm
+  const checkIsFinished =  async () => {
     if (inputValue.length === quoteString.length && inputValue[quoteString.length - 1] === quoteString[quoteString.length - 1]) {
-      testResults.push(wpm)
+      finalWpm = correctChars / 5 / currentTime * 60
+      stopTimer()
+      testResults.push(finalWpm)
       let sum = 0
       testResults.forEach(wpm => sum += wpm)
       setAvgWpm(sum / testResults.length)
+      finalWpm > best && setBest(finalWpm)
       setIsFinished(true)
-      stopTimer()
     }
   }
 
@@ -153,7 +156,7 @@ function App() {
       timerStarted = true;
     }
     if (event.key === "Enter") {
-      setRenderNewQuote(old => !old)
+      newQuote()
     }
     //only changes the letter pressed, problem with ctrl backspace not working
     // else if (event.key === "Backspace") {
@@ -179,12 +182,17 @@ function App() {
 
       <div className="Header">
         <h1 className="Title">Quack Typer</h1>
-        <span style={{ ...styles.default, position: "absolute", left: "2vw", top: "3vh", fontSize: "22px" }}>Avg: {avgWpm.toFixed(2)}</span>
+        <div className="StatsContainer">
+          <div style={{display: "flex", flexDirection: "column"}}>
+            <span>Best: {best.toFixed(2)}</span>
+            <span>Avg: {avgWpm.toFixed(2)}</span>
+          </div>
+        </div>
       </div>
 
       <span style={{ ...styles.default, fontSize: "22px", marginTop: "-2%", marginBottom: "2%" }}>Wpm: {wpm.toFixed(2)} Accuracy: {accuracy.toFixed(2)}%</span>
 
-      <div className="Card" style={{boxShadow: isCardChecked && "0px 0px 15px black", backgroundColor: isCardChecked && "#282b30"}}>
+      <div className="Card" style={{ boxShadow: isCardChecked && "0px 0px 15px black", backgroundColor: isCardChecked && "#282b30" }}>
         {quote && quote?.map((Word, i) => {
           return (
             <div className="Word" key={i * 10 + 5}>
@@ -208,23 +216,22 @@ function App() {
         }
       </div>
 
-      <input className="Input" style={{ opacity: isInputChecked ? "1" : "0" }} ref={inputRef} onBlur={() => inputRef.current.focus()} type="text" spellcheck="false" autoFocus onKeyDown={(event) => handleKeyDown(event)} onChange={(event) => handleChange(event)}></input>
+      <input className="Input" style={{ opacity: isInputChecked ? "1" : "0" }} ref={inputRef} onBlur={() => inputRef.current.focus()} type="text" spellCheck="false" autoFocus onKeyDown={(event) => handleKeyDown(event)} onChange={(event) => handleChange(event)}></input>
       <span style={{ ...styles.default, fontSize: "22px", marginTop: "1%", opacity: isFinished ? ".5" : "0" }} >Press Enter to Continue...</span>
 
       <div className="Settings">
-
         <div className='ToggleContainer'>
           <span style={{ ...styles.default, fontSize: "14px" }}>Toggle Card&nbsp;&nbsp;</span>
-          <input className="Checkbox" type="checkbox" defaultChecked={isCardChecked} onClick={() => { setIsCardChecked(old => !old) }}/>
+          <input className="Checkbox" type="checkbox" defaultChecked={isCardChecked} onClick={() => { setIsCardChecked(old => !old) }} />
 
         </div>
         <div className="ToggleContainer">
           <span style={{ ...styles.default, fontSize: "14px" }}>Toggle Input&nbsp;</span>
-          <input className="Checkbox" type="checkbox" defaultChecked={isInputChecked} onClick={() => { setIsInputChecked(old => !old) }}/>
+          <input className="Checkbox" type="checkbox" defaultChecked={isInputChecked} onClick={() => { setIsInputChecked(old => !old) }} />
         </div>
       </div>
 
-      <span style={{ opacity: "0" }}>{renderText}</span>
+        <span style={{opacity: "0"}}>{rerender}</span>
     </div>
   );
 }
