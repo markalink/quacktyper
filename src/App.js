@@ -12,6 +12,7 @@ let incorrectChars;
 let timerStarted = false;
 let currentTime;
 let testResults = [];
+let newBest = false
 
 function App() {
   const QUOTE_API = "https://quotable.io/random?minLength=150"; //find api with more quotes
@@ -42,10 +43,10 @@ function App() {
   }
 
   useEffect(() => {
-    newQuote() 
+    newQuote()
     setRerender(old => !old)
     //eslint-disable-next-line
-},[])
+  }, [])
 
   const newQuote = async () => {
     let tempQuote = [];
@@ -74,6 +75,7 @@ function App() {
     correctChars = 0
     mistakeCount = 0
     prevIncorrectChars = 0
+    newBest = false
     timerStarted = false
     setIsFinished(false)
     setRerender(old => !old)
@@ -117,9 +119,8 @@ function App() {
       mistakeCount += incorrectChars - prevIncorrectChars;
     }
     prevIncorrectChars = incorrectChars
-    setWpm(correctChars / 5 / currentTime * 60) //problem with state not changing, setting to NaN
     checkIsFinished()
-    console.log(wpm)
+    !isFinished && setWpm(correctChars / 5 / currentTime * 60) //problem with state not changing, setting to NaN
     setRerender(old => !old)
   }
 
@@ -140,7 +141,7 @@ function App() {
   }
 
   let finalWpm
-  const checkIsFinished =  async () => {
+  const checkIsFinished = async () => {
     if (inputValue.length === quoteString.length && inputValue[quoteString.length - 1] === quoteString[quoteString.length - 1]) {
       finalWpm = correctChars / 5 / currentTime * 60
       stopTimer()
@@ -148,7 +149,10 @@ function App() {
       let sum = 0
       testResults.forEach(wpm => sum += wpm)
       setAvgWpm(sum / testResults.length)
-      finalWpm > best && setBest(finalWpm)
+      if (finalWpm > best) {
+        newBest = true
+        setBest(finalWpm)
+      }
       setIsFinished(true)
     }
   }
@@ -189,8 +193,11 @@ function App() {
       <div className="Header">
         <h1 className="Title">Quack Typer</h1>
         <div className="StatsContainer">
-          <div style={{display: "flex", flexDirection: "column"}}>
-            <span>Best: {best.toFixed(2)}</span>
+          <div style={{ display: "flex", flexDirection: "column" }}>
+            <div>
+              <span>Best: </span>
+              <span style={{color: newBest && "#4CBB17"}}>{best.toFixed(2)}</span>
+            </div>
             <span>Avg: {avgWpm.toFixed(2)}</span>
           </div>
         </div>
@@ -237,7 +244,7 @@ function App() {
         </div>
       </div>
 
-        <span style={{opacity: "0"}}>{rerender}</span>
+      <span style={{ opacity: "0" }}>{rerender}</span>
     </div>
   );
 }
