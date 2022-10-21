@@ -1,13 +1,13 @@
 {
   "files": {
-    "main.css": "/quacktyper/static/css/main.ccadaf55.css",
-    "main.js": "/quacktyper/static/js/main.9bccdb0c.js",
+    "main.css": "/quacktyper/static/css/main.1c356fd5.css",
+    "main.js": "/quacktyper/static/js/main.e781a658.js",
     "index.html": "/quacktyper/index.html",
-    "main.ccadaf55.css.map": "/quacktyper/static/css/main.ccadaf55.css.map",
-    "main.9bccdb0c.js.map": "/quacktyper/static/js/main.9bccdb0c.js.map"
+    "main.1c356fd5.css.map": "/quacktyper/static/css/main.1c356fd5.css.map",
+    "main.e781a658.js.map": "/quacktyper/static/js/main.e781a658.js.map"
   },
   "entrypoints": [
-    "static/css/main.ccadaf55.css",
-    "static/js/main.9bccdb0c.js"
+    "static/css/main.1c356fd5.css",
+    "static/js/main.e781a658.js"
   ]
 }
