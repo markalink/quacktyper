@@ -1,6 +1,6 @@
 {
   "name": "quack-typer",
-  "homepage": "markalink.github.io",
+  "homepage": "https://markalink.github.io/quacktyper",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
