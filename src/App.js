@@ -27,7 +27,7 @@ function App() {
   const inputRef = useRef(null)
   const showInputRef = useRef(null)
 
-  const [isChecked, setIsChecked] = useState(false)
+  const [isChecked, setIsChecked] = useState(true)
 
   function Letter(value, style) {
     this.value = value;
@@ -113,6 +113,7 @@ function App() {
     }
     prevIncorrectChars = incorrectChars
     checkIsFinished()
+    setWpm(correctChars / 5 / currentTime * 60)
     setRenderText(old => !old)
   }
 
@@ -201,13 +202,14 @@ function App() {
               }
             </div>
           )
-
         })
         }
       </div>
-
       <input className="Input" style={{opacity: isChecked ? "1" : "0"}} ref={inputRef} onBlur={() => inputRef.current.focus()} type="text" spellcheck="false" autoFocus onKeyDown={(event) => handleKeyDown(event)} onChange={(event) => handleChange(event)}></input>
-      <input className="showInput" ref={showInputRef} type="checkbox" onClick={() => {setIsChecked(old => !old); console.log("change")}} style={{color: "#4CBB17", width: "2.5%", height: "2.5%" }} />
+      <div style={{display: "flex", flexDirection: "row", position: "absolute", left: "3%", bottom: "5%"}}>
+        <span style={{...styles.default, fontSize: "14px"}}>Toggle Input </span>
+        <input className="showInput" ref={showInputRef} type="checkbox" defaultChecked={isChecked} onClick={() => {setIsChecked(old => !old)}} style={{color: "#4CBB17", width: "15px", height: "15px" }} />
+      </div>
       <span style={{ opacity: "0" }}>{renderText}</span>
     </div>
   );
