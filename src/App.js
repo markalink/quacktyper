@@ -3,16 +3,29 @@ import './App.css';
 //implement timer/wpm
 //text border card?
 let quoteString;
-  let currentIndex = 0;
+let inputValue;
+let mistakeCount;
+let prevIncorrectChars;
+let correctChars;
+let incorrectChars;
+//let currentIndex = 0; for single character update implementation
+let timerStarted = false;
+let isFinished;
+let currentTime;
+let testResults = [];
 
 function App() {
-  const QUOTE_API = "http://api.quotable.io/random?minLength=150"; //find api with longer quotes or filter these
+  const QUOTE_API = "http://api.quotable.io/random?tags=love&minLength=150"; //find api with longer quotes or filter these
 
-  const [testsFinished, setTestsFinished] = useState(0) //differentiate between completed and skipped w/enter
+  const [renderNewQuote, setRenderNewQuote] = useState(false)
+  const [renderText, setRenderText] = useState(false);
+  // const [testResults, setTestResults] = useState([]) //differentiate between completed and skipped w/enter
   const [quote, setQuote] = useState([])
-  const [render, setRender] = useState(false);
+  const [accuracy, setAccuracy] = useState(0)
+  const [wpm, setWpm] = useState(0)
+  const [avgWpm, setAvgWpm] = useState(0)
   const inputRef = useRef(null)
-  
+
   function Letter(value, style) {
     this.value = value;
     this.style = style;
@@ -21,25 +34,32 @@ function App() {
     this.index = index
     this.letters = letters
   }
-  
+
   const fetchQuote = async () => {
     return fetch(QUOTE_API).then(response => response.json()).then(data => data.content)
   }
 
   useEffect(() => {
+    stopTimer()
     newQuote()
     inputRef.current.value = ""
-  }, [testsFinished])
+    currentTime = 0
+    correctChars = 0
+    mistakeCount = 0
+    prevIncorrectChars = 0
+    timerStarted = false
+    isFinished = false
+  }, [renderNewQuote])
 
   const newQuote = async () => {
     let tempQuote = [];
-    quoteString = await fetchQuote();
-    // const quoteString = "word"
+    quoteString = await fetchQuote(); //deal with this character — replace with -
+    // quoteString = "word"
     const wordArray = quoteString.split(" ")
     let wordLetters = []
     let wordIndex = 0;
 
-    for(let i = 0; i < wordArray.length; i++) {
+    for (let i = 0; i < wordArray.length; i++) {
       wordArray[i].split("").map(char => wordLetters.push(new Letter(char, styles.default)))
       wordLetters.push(new Letter(" ", styles.default))
       tempQuote.push(new Word(wordIndex, wordLetters))
@@ -48,54 +68,105 @@ function App() {
     }
     tempQuote[tempQuote.length - 1].letters.splice(-1, 1)
     setQuote(tempQuote);
+    // currentIndex = 0; for single character update implementation
+  }
+
+  let startTime;
+  const [intervalId, setIntervalId] = useState()
+  const startTimer = () => {
+    startTime = new Date()
+    setIntervalId(setInterval(() => {
+      currentTime = (new Date() - startTime) / 1000
+      setWpm(correctChars / 5 / currentTime * 60)
+      setAccuracy((correctChars) / (correctChars + incorrectChars + mistakeCount) * 100)
+    }, 500)
+    )
+  }
+  const stopTimer = () => {
+    clearInterval(intervalId)
   }
 
   const handleChange = (event) => {
-    //finish only when perfect match
-    if(event.target.value === quoteString) {
-      setTestsFinished(old => old + 1)
-    }
+    inputValue = event.target.value;
 
-    //finish if last key is same
-    if(event.target.value.length === quoteString.length && event.target.value[quoteString.length -1] === quoteString[quoteString.length - 1]){
-      setTestsFinished(old => old + 1)
+    correctChars = 0;
+    incorrectChars = 0;
+    for (let i = 0; i < quoteString.length; i++) {
+      if (i > inputValue.length - 1) {
+        changeLetterStyle(i, styles.default)
+      }
+      else if (quoteString[i] === inputValue[i]) {
+        changeLetterStyle(i, styles.correct)
+        correctChars += 1
+      }
+      else {
+        changeLetterStyle(i, styles.incorrect)
+        incorrectChars += 1
+      }
     }
+    if(incorrectChars > prevIncorrectChars){
+      mistakeCount += incorrectChars - prevIncorrectChars;
+    }
+    prevIncorrectChars = incorrectChars
+    checkIsFinished()
+    setRenderText(old => !old)
   }
 
   const changeLetterStyle = (index, style) => {
+    if (index > quoteString.length - 1 || isFinished) {
+      return;
+    }
     let tempQuote = quote;
-    for(let j = 0; j < tempQuote.length; j++){
-      if(tempQuote[j].index > index) {
+    for (let j = 0; j < tempQuote.length; j++) {
+      if (tempQuote[j].index > index) {
         tempQuote[j - 1].letters[index - tempQuote[j - 1].index].style = style
-        return tempQuote
+        setQuote(tempQuote)
+        return;
       }
     }
-    tempQuote[tempQuote.length - 1].letters[index - tempQuote[tempQuote.length -1].index].style = style
+    tempQuote[tempQuote.length - 1].letters[index - tempQuote[tempQuote.length - 1].index].style = style
     setQuote(tempQuote);
   }
 
+  const checkIsFinished = () => {
+    if (inputValue.length === quoteString.length && inputValue[quoteString.length - 1] === quoteString[quoteString.length - 1]) {
+      testResults.push(wpm)
+      let sum = 0
+      testResults.forEach(wpm => sum += wpm)
+      setAvgWpm(sum / testResults.length)
+      isFinished = true;
+      stopTimer()
+    }
+  }
+
   const handleKeyDown = (event) => {
-    if(event.key === "Shift" || event.key === "CapsLock"){
+    if (ignoreKeys.includes(event.key)) {
       return;
     }
-    if(event.key === "Enter"){
-      setTestsFinished(old => old + 1)
+    if (!timerStarted && currentTime === 0) {
+      startTimer();
+      timerStarted = true;
     }
-    else if (event.key === "Backspace") {
-      console.log("backspace")
-      currentIndex -= 1;
-      changeLetterStyle(currentIndex, styles.default)
+    if (event.key === "Enter") {
+      setRenderNewQuote(old => !old)
     }
-    else{
-      if(event.key === quoteString[currentIndex]){
-        changeLetterStyle(currentIndex, styles.correct)
-      }
-      else {
-        changeLetterStyle(currentIndex, styles.incorrect)
-      }
-      currentIndex += 1;
-    }
-    setRender(old => !old)
+    //only changes the letter pressed, problem with ctrl backspace not working
+    // else if (event.key === "Backspace") {
+    //   if (currentIndex > 0) {
+    //     currentIndex -= 1;
+    //     changeLetterStyle(currentIndex, styles.default)
+    //   }
+    // }
+    // else {
+    //   if (event.key === quoteString[currentIndex]) {
+    //     changeLetterStyle(currentIndex, styles.correct)
+    //   }
+    //   else {
+    //     changeLetterStyle(currentIndex, styles.incorrect)
+    //   }
+    //   currentIndex += 1;
+    // }
+    // setRenderText(old => !old)
   }
 
   return (
@@ -103,8 +174,9 @@ function App() {
 
       <div className="Header">
         <h1 className="Title">Quack Typer</h1>
+        <span style={{...styles.default, position: "absolute", left: "3%", top: "5%"}}>Avg: {avgWpm.toFixed(2)}</span>
       </div>
-      
+      <span style={{...styles.default, marginTop: "-2%", marginBottom: "2%"}}>Wpm: {wpm.toFixed(2)} Accuracy: {accuracy.toFixed(2)}%</span>
       <div className="Card">
         {quote && quote?.map((Word, i) => {
           return (
@@ -113,7 +185,7 @@ function App() {
                 Word.letters.map((Letter, i) => {
                   if (Letter.value === " ") {
                     return (
-                      <span key={i * 10} style={Letter.style === styles.incorrect ? {...Letter.style, textDecoration: "underline", marginTop: "33px"} : {...Letter.style}}>&nbsp;</span>
+                      <span key={i * 10} style={Letter.style === styles.incorrect ? { ...Letter.style, textDecoration: "underline", marginTop: "33px" } : { ...Letter.style }}>&nbsp;</span>
                     )
                   }
                   else {
@@ -125,13 +197,13 @@ function App() {
               }
             </div>
           )
-          
+
         })
         }
       </div>
 
       <input className="Input" ref={inputRef} type="text" autoFocus onKeyDown={(event) => handleKeyDown(event)} onChange={(event) => handleChange(event)}></input>
-      <span style={{color: "white", fontSize: "30px", fontFamily: "Roboto Mono", marginTop: "8vw"}}>{render}</span>
+      <span style={{ color: "white", fontSize: "30px", fontFamily: "Roboto Mono", marginTop: "8vw" }}>{renderText}</span>
     </div>
   );
 }
@@ -142,4 +214,13 @@ const styles = {
   incorrect: { color: "#e62020", fontSize: "30px", fontFamily: "Roboto Mono" }
 }
 
+const ignoreKeys = [
+  "Shift",
+  "ArrowUp",
+  "ArrowDown",
+  "ArrowLeft",
+  "ArrowRight",
+  "Alt",
+  "Control",
+]
 export default App;
