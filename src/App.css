@@ -23,11 +23,9 @@
   display: flex;
   flex-wrap: wrap;
   flex-direction: "row";
-  padding: 10px;
+  padding: 20px;
   width: 70vw;
-  border-radius: 5px;
-  /* box-shadow: 0px 0px 15px black;
-  background-color: #282b30; */
+  border-radius: 10px;
 }
 
 .Word {
@@ -52,7 +50,18 @@
   text-decoration: none;
   /* opacity: 1; */
 }
-.showInput {
+.Settings {
+  position: absolute;
+  bottom: 2vh;
+  left: 2vw;
+}
+.ToggleContainer {
+  display: flex;
+  flex-direction: row;
+  margin-bottom: 5px;
+}
+.Checkbox {
   accent-color: #4CBB17;
-  background-color: grey;
+  width: 15px;
+  height: 15px;
 }

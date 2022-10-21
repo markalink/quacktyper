@@ -10,7 +10,6 @@ let correctChars;
 let incorrectChars;
 //let currentIndex = 0; for single character update implementation
 let timerStarted = false;
-let isFinished;
 let currentTime;
 let testResults = [];
 
@@ -25,9 +24,10 @@ function App() {
   const [wpm, setWpm] = useState(0)
   const [avgWpm, setAvgWpm] = useState(0)
   const inputRef = useRef(null)
-  const showInputRef = useRef(null)
 
-  const [isChecked, setIsChecked] = useState(true)
+  const [isFinished, setIsFinished] = useState(false)
+  const [isInputChecked, setIsInputChecked] = useState(true)
+  const [isCardChecked, setIsCardChecked] = useState(false)
 
   function Letter(value, style) {
     this.value = value;
@@ -51,13 +51,13 @@ function App() {
     mistakeCount = 0
     prevIncorrectChars = 0
     timerStarted = false
-    isFinished = false
+    setIsFinished(false)
   }, [renderNewQuote])
 
   const newQuote = async () => {
     let tempQuote = [];
     quoteString = await fetchQuote(); //deal with this character — replace with -
-    quoteString = quoteString.replace("—","-")
+    quoteString = quoteString.replace("—", "-")
     // quoteString = "word"
     const wordArray = quoteString.split(" ")
     let wordLetters = []
@@ -108,7 +108,7 @@ function App() {
         incorrectChars += 1
       }
     }
-    if(incorrectChars > prevIncorrectChars){
+    if (incorrectChars > prevIncorrectChars) {
       mistakeCount += incorrectChars - prevIncorrectChars;
     }
     prevIncorrectChars = incorrectChars
@@ -139,7 +139,7 @@ function App() {
       let sum = 0
       testResults.forEach(wpm => sum += wpm)
       setAvgWpm(sum / testResults.length)
-      isFinished = true;
+      setIsFinished(true)
       stopTimer()
     }
   }
@@ -179,10 +179,12 @@ function App() {
 
       <div className="Header">
         <h1 className="Title">Quack Typer</h1>
-        <span style={{...styles.default, position: "absolute", left: "3%", top: "5%"}}>Avg: {avgWpm.toFixed(2)}</span>
+        <span style={{ ...styles.default, position: "absolute", left: "2vw", top: "3vh", fontSize: "22px" }}>Avg: {avgWpm.toFixed(2)}</span>
       </div>
-      <span style={{...styles.default, marginTop: "-2%", marginBottom: "2%"}}>Wpm: {wpm.toFixed(2)} Accuracy: {accuracy.toFixed(2)}%</span>
-      <div className="Card">
+
+      <span style={{ ...styles.default, fontSize: "22px", marginTop: "-2%", marginBottom: "2%" }}>Wpm: {wpm.toFixed(2)} Accuracy: {accuracy.toFixed(2)}%</span>
+
+      <div className="Card" style={{boxShadow: isCardChecked && "0px 0px 15px black", backgroundColor: isCardChecked && "#282b30"}}>
         {quote && quote?.map((Word, i) => {
           return (
             <div className="Word" key={i * 10 + 5}>
@@ -205,11 +207,23 @@ function App() {
         })
         }
       </div>
-      <input className="Input" style={{opacity: isChecked ? "1" : "0"}} ref={inputRef} onBlur={() => inputRef.current.focus()} type="text" spellcheck="false" autoFocus onKeyDown={(event) => handleKeyDown(event)} onChange={(event) => handleChange(event)}></input>
-      <div style={{display: "flex", flexDirection: "row", position: "absolute", left: "3%", bottom: "5%"}}>
-        <span style={{...styles.default, fontSize: "14px"}}>Toggle Input </span>
-        <input className="showInput" ref={showInputRef} type="checkbox" defaultChecked={isChecked} onClick={() => {setIsChecked(old => !old)}} style={{color: "#4CBB17", width: "15px", height: "15px" }} />
+
+      <input className="Input" style={{ opacity: isInputChecked ? "1" : "0" }} ref={inputRef} onBlur={() => inputRef.current.focus()} type="text" spellcheck="false" autoFocus onKeyDown={(event) => handleKeyDown(event)} onChange={(event) => handleChange(event)}></input>
+      <span style={{ ...styles.default, fontSize: "22px", marginTop: "1%", opacity: isFinished ? ".5" : "0" }} >Press Enter to Continue...</span>
+
+      <div className="Settings">
+
+        <div className='ToggleContainer'>
+          <span style={{ ...styles.default, fontSize: "14px" }}>Toggle Card&nbsp;&nbsp;</span>
+          <input className="Checkbox" type="checkbox" defaultChecked={isCardChecked} onClick={() => { setIsCardChecked(old => !old) }}/>
+
+        </div>
+        <div className="ToggleContainer">
+          <span style={{ ...styles.default, fontSize: "14px" }}>Toggle Input&nbsp;</span>
+          <input className="Checkbox" type="checkbox" defaultChecked={isInputChecked} onClick={() => { setIsInputChecked(old => !old) }}/>
+        </div>
       </div>
+
       <span style={{ opacity: "0" }}>{renderText}</span>
     </div>
   );
@@ -220,9 +234,9 @@ const textStyle = {
   fontFamily: "Roboto Mono",
 }
 const styles = {
-  default: { ...textStyle, color: "#99aab5"},
-  correct: { ...textStyle, color: "#4CBB17"},
-  incorrect: { ...textStyle, color: "#e62020"}
+  default: { ...textStyle, color: "#99aab5" },
+  correct: { ...textStyle, color: "#4CBB17" },
+  incorrect: { ...textStyle, color: "#e62020" }
 }
 const ignoreKeys = [
   "Shift",
