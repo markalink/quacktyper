@@ -41,7 +41,11 @@ function App() {
     return fetch(QUOTE_API).then(response => response.json()).then(data => data.content)
   }
 
-  useEffect(() => newQuote,[])
+  useEffect(() => {
+    newQuote() 
+    setRerender(old => !old)
+    //eslint-disable-next-line
+},[])
 
   const newQuote = async () => {
     let tempQuote = [];
@@ -53,6 +57,7 @@ function App() {
     let wordIndex = 0;
 
     for (let i = 0; i < wordArray.length; i++) {
+      //eslint-disable-next-line
       wordArray[i].split("").map(char => wordLetters.push(new Letter(char, styles.default)))
       wordLetters.push(new Letter(" ", styles.default))
       tempQuote.push(new Word(wordIndex, wordLetters))
@@ -71,6 +76,7 @@ function App() {
     prevIncorrectChars = 0
     timerStarted = false
     setIsFinished(false)
+    setRerender(old => !old)
   }
 
   let startTime;
