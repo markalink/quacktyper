@@ -25,6 +25,9 @@ function App() {
   const [wpm, setWpm] = useState(0)
   const [avgWpm, setAvgWpm] = useState(0)
   const inputRef = useRef(null)
+  const showInputRef = useRef(null)
+
+  const [isChecked, setIsChecked] = useState(false)
 
   function Letter(value, style) {
     this.value = value;
@@ -203,8 +206,9 @@ function App() {
         }
       </div>
 
-      <input className="Input" ref={inputRef} onBlur={() => inputRef.current.focus()} type="text" spellcheck="false" autoFocus onKeyDown={(event) => handleKeyDown(event)} onChange={(event) => handleChange(event)}></input>
-      <span style={{ color: "white", fontSize: "30px", fontFamily: "Roboto Mono", marginTop: "8vw" }}>{renderText}</span>
+      <input className="Input" style={{opacity: isChecked ? "1" : "0"}} ref={inputRef} onBlur={() => inputRef.current.focus()} type="text" spellcheck="false" autoFocus onKeyDown={(event) => handleKeyDown(event)} onChange={(event) => handleChange(event)}></input>
+      <input className="showInput" ref={showInputRef} type="checkbox" onClick={() => {setIsChecked(old => !old); console.log("change")}} style={{color: "#4CBB17", width: "2.5%", height: "2.5%" }} />
+      <span style={{ opacity: "0" }}>{renderText}</span>
     </div>
   );
 }

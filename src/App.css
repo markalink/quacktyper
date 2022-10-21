@@ -50,5 +50,9 @@
   font-size: 18px;
   padding-inline: 20px;
   text-decoration: none;
-  opacity: 1;
+  /* opacity: 1; */
+}
+.showInput {
+  accent-color: #4CBB17;
+  background-color: grey;
 }
