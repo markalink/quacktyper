@@ -7,6 +7,7 @@
   height: 100vh;
   width: 100wh;
   align-items: center;
+  overflow: hidden;
 }
 
 .Header {
@@ -41,12 +42,13 @@
   margin-top: 40px;
   background-color: #282b30;
   border-radius: 5px;
-  border-width: 0px;
-  border-color: #99aab5;
-  /* height: 40px; */
-  height: 0px;
+  height: 40px;
+  outline: none;
+  border: none;
   color: #99aab5;
   font-family: Roboto Mono;
   font-size: 18px;
-  /* padding-inline: 20px; */
+  padding-inline: 20px;
+  text-decoration: none;
+  opacity: 1;
 }

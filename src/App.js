@@ -15,7 +15,7 @@ let currentTime;
 let testResults = [];
 
 function App() {
-  const QUOTE_API = "http://api.quotable.io/random?tags=love&minLength=150"; //find api with longer quotes or filter these
+  const QUOTE_API = "https://quotable.io/random?minLength=150"; //find api with longer quotes or filter these
 
   const [renderNewQuote, setRenderNewQuote] = useState(false)
   const [renderText, setRenderText] = useState(false);
@@ -54,6 +54,7 @@ function App() {
   const newQuote = async () => {
     let tempQuote = [];
     quoteString = await fetchQuote(); //deal with this character — replace with -
+    quoteString = quoteString.replace("—","-")
     // quoteString = "word"
     const wordArray = quoteString.split(" ")
     let wordLetters = []
@@ -202,18 +203,21 @@ function App() {
         }
       </div>
 
-      <input className="Input" ref={inputRef} type="text" autoFocus onKeyDown={(event) => handleKeyDown(event)} onChange={(event) => handleChange(event)}></input>
+      <input className="Input" ref={inputRef} onBlur={() => inputRef.current.focus()} type="text" spellcheck="false" autoFocus onKeyDown={(event) => handleKeyDown(event)} onChange={(event) => handleChange(event)}></input>
       <span style={{ color: "white", fontSize: "30px", fontFamily: "Roboto Mono", marginTop: "8vw" }}>{renderText}</span>
     </div>
   );
 }
 
-const styles = {
-  default: { color: "#99aab5", fontSize: "30px", fontFamily: "Roboto Mono" },
-  correct: { color: "#4CBB17", fontSize: "30px", fontFamily: "Roboto Mono" },
-  incorrect: { color: "#e62020", fontSize: "30px", fontFamily: "Roboto Mono" }
+const textStyle = {
+  fontSize: "25px",
+  fontFamily: "Roboto Mono",
 }
-
+const styles = {
+  default: { ...textStyle, color: "#99aab5"},
+  correct: { ...textStyle, color: "#4CBB17"},
+  incorrect: { ...textStyle, color: "#e62020"}
+}
 const ignoreKeys = [
   "Shift",
   "ArrowUp",
