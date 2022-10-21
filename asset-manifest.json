@@ -1,10 +1,10 @@
 {
   "files": {
-    "main.css": "/quacktyper/static/css/main.1c356fd5.css",
-    "main.js": "/quacktyper/static/js/main.e781a658.js",
-    "index.html": "/quacktyper/index.html",
-    "main.1c356fd5.css.map": "/quacktyper/static/css/main.1c356fd5.css.map",
-    "main.e781a658.js.map": "/quacktyper/static/js/main.e781a658.js.map"
+    "main.css": "/static/css/main.1c356fd5.css",
+    "main.js": "/static/js/main.e781a658.js",
+    "index.html": "/index.html",
+    "main.1c356fd5.css.map": "/static/css/main.1c356fd5.css.map",
+    "main.e781a658.js.map": "/static/js/main.e781a658.js.map"
   },
   "entrypoints": [
     "static/css/main.1c356fd5.css",
