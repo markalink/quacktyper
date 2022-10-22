@@ -10,7 +10,8 @@ let correctChars;
 let incorrectChars;
 //let currentIndex = 0; for single character update implementation
 let timerStarted = false;
-let currentTime;
+let currentTime = 1;
+let startTime;
 let testResults = [];
 let newBest = false
 
@@ -66,7 +67,7 @@ function App() {
 
     for (let i = 0; i < wordArray.length; i++) {
       //eslint-disable-next-line
-      wordArray[i].split("").map(char => wordLetters.push(new Letter(char, styles.default)))
+      wordArray[i].split("").map(char => wordLetters.push(new Letter(char, {...styles.default, textDecoration: isUnderlineChecked && i === 0 ? "underline" : "none"})))
       wordLetters.push(new Letter(" ", styles.default))
       tempQuote.push(new Word(wordIndex, wordLetters))
       wordIndex += wordLetters.length
@@ -78,7 +79,7 @@ function App() {
 
     stopTimer()
     inputRef.current.value = ""
-    currentTime = 0
+    currentTime = 1
     correctChars = 0
     mistakeCount = 0
     prevIncorrectChars = 0
@@ -88,8 +89,9 @@ function App() {
     setRerender(old => !old)
   }
 
-  let startTime;
+ 
   const [intervalId, setIntervalId] = useState()
+
   const startTimer = () => {
     startTime = new Date()
     setIntervalId(setInterval(() => {
@@ -133,13 +135,13 @@ function App() {
     }
     prevIncorrectChars = incorrectChars
     checkIsFinished()
-    isUnderlineChecked && !isFinished && underlineCurrentWord()
-    !isFinished && setWpm(correctChars / 5 / currentTime * 60)
+    isUnderlineChecked && quote.length && !isFinished && underlineCurrentWord()
+    timerStarted && !isFinished && (currentTime = (new Date() - startTime) / 1000)
     setRerender(old => !old)
   }
 
   const changeLetterStyle = (index, style, quote) => {
-    if (index > quoteString.length - 1 || isFinished) {
+    if (quoteString.length === 0 || index > quoteString.length - 1 || isFinished) {
       return quote;
     }
     let tempQuote = quote;
@@ -153,7 +155,7 @@ function App() {
     return tempQuote
   }
 
-  const underlineCurrentWord = () => {
+  const underlineCurrentWord = async () => {
     let isCorrect = true
     let index = -1;
     let tempQuote = quote
@@ -182,18 +184,19 @@ function App() {
 
   let finalWpm
   const checkIsFinished = async () => {
-    if (inputValue.length === quoteString.length && inputValue[quoteString.length - 1] === quoteString[quoteString.length - 1]) {
+    if (quoteString.length !== 0 && inputValue.length === quoteString.length && inputValue[quoteString.length - 1] === quoteString[quoteString.length - 1]) {
+      setIsFinished(true)
       finalWpm = correctChars / 5 / currentTime * 60
+      setWpm(finalWpm)
       stopTimer()
       testResults.push(finalWpm)
       let sum = 0
-      testResults.forEach(wpm => sum += wpm)
-      setAvgWpm(sum / testResults.length)
+      testResults.forEach((wpm) => sum += wpm)
+      setAvgWpm(testResults.length === 0 ? 0 : sum / testResults.length)
       if (finalWpm > best) {
         newBest = true
         setBest(finalWpm)
       }
-      setIsFinished(true)
     }
   }
 
@@ -201,7 +204,7 @@ function App() {
     if (ignoreKeys.includes(event.key)) {
       return;
     }
-    if (!timerStarted && currentTime === 0) {
+    if (!timerStarted && currentTime === 1) {
       startTimer();
       timerStarted = true;
     }
