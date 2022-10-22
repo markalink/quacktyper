@@ -57,7 +57,11 @@
   font-size: 18px;
   padding-inline: 20px;
   text-decoration: none;
-  /* opacity: 1; */
+}
+.Letter {
+  /* text-decoration-color: #e62020; */
+  /* white-space: pre; */
+  text-underline-offset: 3px;
 }
 .Settings {
   position: absolute;

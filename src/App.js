@@ -28,6 +28,7 @@ function App() {
   const [isFinished, setIsFinished] = useState(false)
   const [isInputChecked, setIsInputChecked] = useState(true)
   const [isCardChecked, setIsCardChecked] = useState(false)
+  const [isUnderlineChecked, setIsUnderlineChecked] = useState(false)
 
   function Letter(value, style) {
     this.value = value;
@@ -47,6 +48,12 @@ function App() {
     setRerender(old => !old)
     //eslint-disable-next-line
   }, [])
+
+  useEffect(() => {
+    renderQuote()
+    // eslint-disable-next-line
+  },[isUnderlineChecked])
+
 
   const newQuote = async () => {
     let tempQuote = [];
@@ -99,45 +106,78 @@ function App() {
 
   const handleChange = (event) => {
     inputValue = event.target.value;
+    renderQuote()
+  }
 
+  const renderQuote = () => {
     correctChars = 0;
     incorrectChars = 0;
+    let tempQuote = quote;
+
     for (let i = 0; i < quoteString.length; i++) {
       if (i > inputValue.length - 1) {
-        changeLetterStyle(i, styles.default)
+        tempQuote = changeLetterStyle(i, styles.default, tempQuote)
       }
       else if (quoteString[i] === inputValue[i]) {
-        changeLetterStyle(i, styles.correct)
+        tempQuote = changeLetterStyle(i, styles.correct, tempQuote)
         correctChars += 1
       }
       else {
-        changeLetterStyle(i, styles.incorrect)
+        tempQuote = changeLetterStyle(i, styles.incorrect, tempQuote)
         incorrectChars += 1
       }
     }
+    setQuote(tempQuote)
     if (incorrectChars > prevIncorrectChars) {
       mistakeCount += incorrectChars - prevIncorrectChars;
     }
     prevIncorrectChars = incorrectChars
     checkIsFinished()
-    !isFinished && setWpm(correctChars / 5 / currentTime * 60) //problem with state not changing, setting to NaN
+    isUnderlineChecked && !isFinished && underlineCurrentWord()
+    !isFinished && setWpm(correctChars / 5 / currentTime * 60)
     setRerender(old => !old)
   }
 
-  const changeLetterStyle = (index, style) => {
+  const changeLetterStyle = (index, style, quote) => {
     if (index > quoteString.length - 1 || isFinished) {
-      return;
+      return quote;
     }
     let tempQuote = quote;
-    for (let j = 0; j < tempQuote.length; j++) {
-      if (tempQuote[j].index > index) {
-        tempQuote[j - 1].letters[index - tempQuote[j - 1].index].style = style
-        setQuote(tempQuote)
-        return;
+    for (let i = 0; i < tempQuote.length; i++) {
+      if (tempQuote[i].index > index) {
+        tempQuote[i - 1].letters[index - tempQuote[i - 1].index].style = style
+        return tempQuote;
       }
     }
     tempQuote[tempQuote.length - 1].letters[index - tempQuote[tempQuote.length - 1].index].style = style
-    setQuote(tempQuote);
+    return tempQuote
+  }
+
+  const underlineCurrentWord = () => {
+    let isCorrect = true
+    let index = -1;
+    let tempQuote = quote
+
+    quote.every((Word, i) => {
+      if (Word.index > inputValue.length) {
+        index = i - 1
+        return false;
+      }
+      return true;
+    })
+    index === -1 && (index = tempQuote.length - 1)
+    inputValue.length === 0 && (index = 0)
+    tempQuote[index].letters.forEach((Letter, i) => {
+      if (inputValue.length > tempQuote[index].index + i && Letter.value !== inputValue[tempQuote[index].index + i]) {
+        isCorrect = false
+      }
+    })
+    tempQuote[index].letters.forEach((Letter, i) => {
+      if (i !== tempQuote[index].letters.length - 1 || index === tempQuote.length - 1) {
+        Letter.style = { ...Letter.style, textDecoration: isCorrect ? "underline" : "underline #e62020" }
+      }
+    })
+    setQuote(tempQuote)
   }
 
   let finalWpm
@@ -196,7 +236,7 @@ function App() {
           <div style={{ display: "flex", flexDirection: "column" }}>
             <div>
               <span>Best: </span>
-              <span style={{color: newBest && "#4CBB17"}}>{best.toFixed(2)}</span>
+              <span style={{ color: newBest && "#4CBB17" }}>{best.toFixed(2)}</span>
             </div>
             <span>Avg: {avgWpm.toFixed(2)}</span>
           </div>
@@ -213,12 +253,12 @@ function App() {
                 Word.letters.map((Letter, i) => {
                   if (Letter.value === " ") {
                     return (
-                      <span key={i * 10} style={Letter.style === styles.incorrect ? { ...Letter.style, textDecoration: "underline", marginTop: "33px" } : { ...Letter.style }}>&nbsp;</span>
+                      <span className="Letter" key={i * 10} style={Letter.style === styles.incorrect ? { ...Letter.style, textDecoration: "underline", marginTop: "25px" } : { ...styles.correct, opacity: "0" }}>&nbsp;</span>
                     )
                   }
                   else {
                     return (
-                      <p key={i * 10} style={Letter.style}>{Letter.value}</p>
+                      <p className="Letter" key={i * 10} style={Letter.style}>{Letter.value}</p>
                     )
                   }
                 })
@@ -234,10 +274,14 @@ function App() {
 
       <div className="Settings">
         <div className='ToggleContainer'>
+          <span style={{ ...styles.default, fontSize: "14px" }}>Underline Word&nbsp;&nbsp;</span>
+          <input className="Checkbox" type="checkbox" defaultChecked={isUnderlineChecked} onClick={() => {setIsUnderlineChecked(old => !old)}} />
+        </div>
+        <div className='ToggleContainer'>
           <span style={{ ...styles.default, fontSize: "14px" }}>Toggle Card&nbsp;&nbsp;</span>
           <input className="Checkbox" type="checkbox" defaultChecked={isCardChecked} onClick={() => { setIsCardChecked(old => !old) }} />
-
         </div>
+
         <div className="ToggleContainer">
           <span style={{ ...styles.default, fontSize: "14px" }}>Toggle Input&nbsp;</span>
           <input className="Checkbox" type="checkbox" defaultChecked={isInputChecked} onClick={() => { setIsInputChecked(old => !old) }} />
@@ -256,7 +300,7 @@ const textStyle = {
 const styles = {
   default: { ...textStyle, color: "#99aab5" },
   correct: { ...textStyle, color: "#4CBB17" },
-  incorrect: { ...textStyle, color: "#e62020" }
+  incorrect: { ...textStyle, color: "#e62020" },
 }
 const ignoreKeys = [
   "Shift",
