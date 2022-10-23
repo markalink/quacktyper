@@ -1,4 +1,4 @@
-//show best time, explore animations
+//show best time, explore animations UNDERLINE WORD TOGGLE DECREASES AVERAGE
 import { useEffect, useRef, useState } from 'react';
 import './App.css';
 
@@ -29,7 +29,7 @@ function App() {
   const [isFinished, setIsFinished] = useState(false)
   const [isInputChecked, setIsInputChecked] = useState(true)
   const [isCardChecked, setIsCardChecked] = useState(false)
-  const [isUnderlineChecked, setIsUnderlineChecked] = useState(false)
+  const [isUnderlineChecked, setIsUnderlineChecked] = useState(true)
 
   function Letter(value, style) {
     this.value = value;
@@ -79,6 +79,7 @@ function App() {
 
     stopTimer()
     inputRef.current.value = ""
+    inputValue = ""
     currentTime = 1
     correctChars = 0
     mistakeCount = 0
@@ -129,7 +130,7 @@ function App() {
         incorrectChars += 1
       }
     }
-    setQuote(tempQuote)
+    !isFinished && setQuote(tempQuote)
     if (incorrectChars > prevIncorrectChars) {
       mistakeCount += incorrectChars - prevIncorrectChars;
     }
@@ -184,7 +185,7 @@ function App() {
 
   let finalWpm
   const checkIsFinished = async () => {
-    if (quoteString.length !== 0 && inputValue.length === quoteString.length && inputValue[quoteString.length - 1] === quoteString[quoteString.length - 1]) {
+    if (quoteString.length !== 0 && inputValue.length === quoteString.length && inputValue[quoteString.length - 1] === quoteString[quoteString.length - 1] && !isFinished) {
       setIsFinished(true)
       finalWpm = correctChars / 5 / currentTime * 60
       setWpm(finalWpm)
