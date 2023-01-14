@@ -1,0 +1,80 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@300&display=swap');
+
+.App {
+  display: flex;
+  flex-direction: column;
+  background-color: #1e2124;
+  height: 100vh;
+  width: 100wh;
+  align-items: center;
+  overflow: hidden;
+}
+
+.Header {
+  margin-bottom: 3vh;
+}
+
+.Title {
+  color: #4CBB17;
+  font-size: 50px;
+}
+
+.StatsContainer {
+  font-size: 22px;
+  font-family: Roboto Mono;
+  color: #99aab5;
+  position: absolute;
+  left: 2vw;
+  top: 3vh;
+}
+
+.Card {
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: "row";
+  padding: 20px;
+  width: 70vw;
+  border-radius: 10px;
+}
+
+.Word {
+  display: flex;
+  flex-direction: row;
+  margin-top: -30px;
+}
+
+.Input {
+  min-width: 40vw;
+  max-width: 40vw;
+  margin-top: 40px;
+  background-color: #282b30;
+  border-radius: 5px;
+  height: 40px;
+  outline: none;
+  border: none;
+  color: #99aab5;
+  font-family: Roboto Mono;
+  font-size: 18px;
+  padding-inline: 20px;
+  text-decoration: none;
+}
+.Letter {
+  /* text-decoration-color: #e62020; */
+  /* white-space: pre; */
+  text-underline-offset: 3px;
+}
+.Settings {
+  position: absolute;
+  bottom: 2vh;
+  left: 2vw;
+}
+.ToggleContainer {
+  display: flex;
+  flex-direction: row;
+  margin-bottom: 5px;
+}
+.Checkbox {
+  accent-color: #4CBB17;
+  width: 15px;
+  height: 15px;
+}
