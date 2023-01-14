@@ -315,7 +315,7 @@ function Home() {
     <div className="App">
 
       <div className="Header">
-        <h1 className="Title">Quack Typer crazy dot update</h1>
+        <h1 className="Title">Quack Typer</h1>
         <div className="StatsContainer">
           <div style={{ display: "flex", flexDirection: "column" }}>
             <div>

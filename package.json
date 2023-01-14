@@ -1,6 +1,6 @@
 {
   "name": "quack-typer",
-  "homepage": "https://quacktyper.com",
+  "homepage": "https://quacktyper.com/#",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
